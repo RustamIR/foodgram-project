@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Список покупок{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'c' %}">
+{% endblock %}
+{% block content %}
+<div class="main__header">
+    <h1 class="main__title">Список покупок</h1>
+</div>
+    <div class="card-list card-list_column">
+        <ul class="shopping-list">
+            {% load thumbnail %}
+            {% for recipe in recipes %}
+            <li class="shopping-list__item" data-id="{{ recipe_id }}">
+                <div class="recipe recipe_reverse">
+                    {% thumbnail recipe.image "960x500" crop="center" as im %}
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe__image recipe__image_big">
+                    {% endthumbnail %}
+                    <h3 class="recipe__title">{{ recipe.title }}</h3>
+                    <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cooking_time }} мин.</p>
+                </div>
+                <a href="#" class="shopping-list__button link">Удалить</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="#"><button class="button button_style_blue">Скачать список</button></a>
+
+
+    </div>
+
+
+{% endblock content %}
+{% block style %}
+<script src="./static/js/config/config.js"></script>
+<script src="./static/js/components/Header.js"></script>
+<script src="./static/js/components/ShopList.js"></script>
+<script src="./static/js/api/Api.js"></script>
+<script src="./static/shopList.js"></script>
+{% endblock style %}
+
