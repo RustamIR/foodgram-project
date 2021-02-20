@@ -1,17 +1,22 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.contrib.auth import get_user_model
-from django.db.models import Q, F
-from django.utils.safestring import mark_safe
 from django_extensions.db.fields import AutoSlugField
-
 
 User = get_user_model()
 
 
 class Ingredient(models.Model):
-    title = models.CharField('Название ингредиента', max_length=200, db_index=True, unique=True)
-    dimension = models.CharField(verbose_name='Eдиница измерения', max_length=50)
+    title = models.CharField(
+        'Название ингредиента',
+        max_length=200,
+        db_index=True,
+        unique=True
+    )
+    dimension = models.CharField(
+        verbose_name='Eдиница измерения',
+        max_length=50
+    )
 
     class Meta:
         ordering = ('title', )
@@ -23,7 +28,11 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    title = models.CharField('Название рецепта', max_length = 200, blank=False)
+    title = models.CharField(
+        'Название рецепта',
+        max_length = 200,
+        blank=False
+    )
     text = models.TextField('Описание', blank=False)
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
@@ -49,13 +58,9 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        related_name='ingredients',
         verbose_name='Ингридиент'
         )
     image = models.ImageField('Изображение', upload_to='images/')
-
-    # def __str__(self):
-    #     return Truncator(self.text).chars(1000)
 
     class Meta:
         ordering = ('-pub_date',)
@@ -64,17 +69,6 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.title
-
-    # @property
-    # def favorite_count(self):
-    #     return self.recipe_amount.count()
-    #
-    # def image_img(self):
-    #     if self.image:
-    #         return mark_safe(f'<img width="90" height="50" src="{self.image.url}" />')
-    #     return 'Без изображения'
-    #
-    # image_img.short_description = 'изображение'
 
 
 class Tag(models.Model):
@@ -91,99 +85,22 @@ class Tag(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='ing')
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='ingredients_amounts'
     )
-    quantity = models.DecimalField(
-        max_digits=6,
-        decimal_places=1,
+    quantity = models.PositiveIntegerField(
         validators=[MinValueValidator(1)]
     )
 
     class Meta:
-        unique_together = ('ingredient', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredient_recipe'
+            )
+        ]
         verbose_name = 'Рецепт - Ингредиент'
         verbose_name_plural = 'Рецепты - Ингредиенты'
-
-    # def __str__(self):
-    #     return f'Из рецепта "{self.recipe}"'
-
-
-# class Subscribe(models.Model):
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='follower',
-#         verbose_name='Пользователь',
-#     )
-#     author = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='following',
-#         verbose_name='Автор'
-#     )
-#
-#     def save(self, **kwargs):
-#         if self.user != self.author:
-#             super(Subscribe, self).save(**kwargs)
-#
-#     def __str__(self):
-#         return f"{self.user.username} follow to {self.author.username}"
-#
-#     class Meta:
-#         constraints = [
-#             models.UniqueConstraint(
-#                 fields=['user', 'author'],
-#                 name='unique_user_author'
-#             ),
-#             models.CheckConstraint(
-#                 check=~Q(user=F('author')),
-#                 name='user_not_author',
-#             )
-#         ]
-#
-#     class Meta:
-#         verbose_name = 'Подписка'
-#         verbose_name_plural = 'Подписки'
-#         unique_together = ('user', 'author')
-#
-#
-# class Favorite(models.Model):
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='favorites',
-#         verbose_name='Пользователь',
-#     )
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE,
-#         related_name='favored_by',
-#         verbose_name='Рецепт в избранном',
-#     )
-#
-#     class Meta:
-#         verbose_name = 'Избраннцй рецепт'
-#         verbose_name_plural = 'Избранные рецепты'
-#
-#
-# class Purchase(models.Model):
-#     user = models.ForeignKey(
-#         User,
-#         on_delete=models.CASCADE,
-#         related_name='purchases',
-#         verbose_name='Пользователь',
-#     )
-#     recipe = models.ForeignKey(
-#         Recipe,
-#         on_delete=models.CASCADE,
-#         verbose_name='Рецепт',
-#     )
-#
-#     class Meta:
-#         unique_together = ('user', 'recipe')
-#         verbose_name = 'Список покупок'
-#         verbose_name_plural = 'Списки покупок'

@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import views
 
+
 urlpatterns = [
     path(
         'ingredients/',
@@ -29,7 +30,7 @@ urlpatterns = [
         name='purchase_delete'
     ),
     path(
-        'subscriptions',
+        'subscriptions/',
         views.SubscribeCreateView.as_view(),
         name='subscribe_create'
     ),
@@ -37,5 +38,6 @@ urlpatterns = [
         'subscriptions/<int:id>/',
         views.SubscribeDeleteView.as_view(),
         name='subscribe_delete'
-    )
+    ),
+
 ]

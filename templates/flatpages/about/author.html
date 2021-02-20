@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Об авторе{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+{% endblock %}
+{% block content %}
+<div class="main__header">
+    <h1 class="main__title">Об авторе</h1>
+</div>
+    <p>
+        Всем привет! Меня зовут Рустам. Это моя первая серьезная работа =). Она немного корявая и страшная, но я ею очень горжусь.
+        Я долго учился на курсах, чтобы суметь написать что-то подобное. Моя карьера только начинается. Надеюсь, я многого достигну.
+    </p>
+<p>Спасибо за внимание!</p>
+{% endblock content %}

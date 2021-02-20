@@ -20,11 +20,15 @@ def is_favored_by(recipe, user):
     return Favorite.objects.filter(recipe=recipe, user=user).exists()
 
 @register.filter
+def in_favorites(recipe, user):
+    return Favorite.objects.filter(recipe=recipe, user=user).exists()
+
+@register.filter
 def in_subscription(recipe, user):
     return Subscribe.objects.filter(recipe=recipe, user=user).exists()
 
 @register.filter
-def is_in_shop_list_of(recipe, user):
+def in_shopping_list(recipe, user):
     return Purchase.objects.filter(recipe=recipe, user=user).exists()
 
 

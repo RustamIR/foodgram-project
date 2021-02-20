@@ -7,12 +7,14 @@ checkout==0.2.0
 dateparser==1.0.0
 Django==2.2.6
 django-cors-headers==3.6.0
+django-debug-toolbar==3.2
 django-environ==0.4.5
 django-extensions==3.1.0
 django-filter==2.4.0
 djangorestframework==3.11.0
 djangorestframework-filters==0.3.0
 djangorestframework-simplejwt==4.3.0
+export==0.1.2
 Faker==6.0.0
 gunicorn==20.0.4
 idna==2.8
@@ -39,6 +41,7 @@ python-dateutil==2.8.1
 pytz==2019.3
 PyYAML==5.4.1
 recipe==0.23.0
+recipes==0.1
 regex==2020.11.13
 requests==2.22.0
 six==1.14.0

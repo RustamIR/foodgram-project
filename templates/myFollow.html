@@ -17,10 +17,10 @@
         </div>
         <div class="card-user__body">
             <ul class="card-user__items">
+                {% for recipe in author.author_recipes.all %}
+                {% if forloop.counter < 4 %}
                 <li class="card-user__item">
                     {% load thumbnail %}
-                    {% for recipe in author.author_recipes.all %}
-                    {% if forloop.counter < 4 %}
                     {% thumbnail recipe.image "960x500" crop="center" as im %}
                     <div class="recipe">
                         <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe__image">
@@ -28,17 +28,14 @@
                         <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cooking_time }} мин.</p>
                     </div>
                     {% endthumbnail %}
-                    {% endif %}
-                    {% endfor %}
                 </li>
-                <li class="card-user__item">
-                    {% if forloop.counter > 3 %}
-                    <a href="{% url 'profile_view' author.username %}" class="card-user__link link">Еще рецепты...</a>
-                    {% endif %}
-                </li>
-                <li class="card-user__item">
-                    <a href="{% url 'profile_view' author.username %}" class="card-user__link link">Перейти к автору</a>
-                </li>
+                {% endif %}
+                {% endfor %}
+                {% if author.recipe_count > 3 %}
+                    <li class="card-user__item">
+                        <a href="{% url 'profile_view' author.username %}" class="card-user__link link">Еще {{ author.recipe_count|add:"-3"|declenize:"рецепт,рецепта,рецептов" }}...</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
         <div class="card-user__footer">
@@ -52,11 +49,11 @@
 {% endif %}
 {% endblock content %}
 {% block style %}
-  <script src="{% static './static/js/components/MainCards.js' %}"></script>
-  <script src="{% static './static/js/components/Subscribe.js' %}"></script>
-  <script src="{% static './static/js/components/MyFollow.js' %}"></script>
-  <script src="{% static './static/js/config/config.js' %}"></script>
-  <script src="{% static './static/js/components/Header.js' %}"></script>
-  <script src="{% static './static/js/api/Api.js' %}"></script>
-  <script src="{% static './static/myFollow.js' %}"></script>
+  <script src="{% static 'js/components/MainCards.js' %}"></script>
+  <script src="{% static 'js/components/Subscribe.js' %}"></script>
+  <script src="{% static 'js/components/MyFollow.js' %}"></script>
+  <script src="{% static 'js/config/config.js' %}"></script>
+  <script src="{% static 'js/components/Header.js' %}"></script>
+  <script src="{% static 'js/api/Api.js' %}"></script>
+  <script src="{% static 'myFollow.js' %}"></script>
 {% endblock style %}

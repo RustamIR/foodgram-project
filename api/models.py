@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models import Q, F
-from recipes.models import Recipe
+from django.db import models
+from django.db.models import F, Q
 
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -21,14 +21,12 @@ class Subscribe(models.Model):
         verbose_name='Автор'
     )
 
-    def save(self, **kwargs):
-        if self.user != self.author:
-            super(Subscribe, self).save(**kwargs)
-
     def __str__(self):
         return f"{self.user.username} follow to {self.author.username}"
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -39,11 +37,6 @@ class Subscribe(models.Model):
                 name='user_not_author',
             )
         ]
-
-    class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        unique_together = ('user', 'author')
 
 
 class Favorite(models.Model):
@@ -61,7 +54,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Избраннцй рецепт'
+        verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
 
 
@@ -76,9 +69,19 @@ class Purchase(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
+        related_name='in_purchases',
     )
 
     class Meta:
-        unique_together = ('user', 'recipe')
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe'
+            ),
+            models.CheckConstraint(
+                check=~Q(user=F('recipe')),
+                name='recipe_not_repite',
+            )
+        ]
