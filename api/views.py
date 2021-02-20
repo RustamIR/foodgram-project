@@ -1,14 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import filters, generics
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from recipes.models import Ingredient, Recipe
+from recipes.sessions import CsrfExemptSessionAuthentication
+
 from .models import Favorite, Purchase, Subscribe
 from .serializers import (FavoriteSerializer, IngredientSerializer,
-                             PurchaseSerializer, SubscribeSerializer)
-from recipes.models import Ingredient, Recipe
+                          PurchaseSerializer, SubscribeSerializer)
 
 User = get_user_model()
 
@@ -25,38 +30,42 @@ class CreateResponseView:
 
 
 class IngredientAPIView(generics.ListAPIView):
-    """Класс для поиска в базе ингредиентов по их названиям."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['^title', ]
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class FavoriteCreateView(CreateResponseView, generics.CreateAPIView):
-    """Класс для добавления рецепта в избранное."""
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
-
-
-class FavoriteDeleteView(APIView):
-    """Класс для удаления рецепта из избранного."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class FavoriteDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
-        favorite = recipe.in_favorite.filter(user=request.user)
+        favorite = recipe.favored_by.filter(user=request.user)
         return Response({"success": bool(favorite.delete())})
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PurchaseCreateView(CreateResponseView, generics.CreateAPIView):
-    """Класс для добавления рецепта в список покупок."""
     queryset = Purchase.objects.all()
     serializer_class = PurchaseSerializer
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PurchaseDeleteView(APIView):
-    """Класс для удаления рецепта из списка покупок."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
@@ -64,16 +73,18 @@ class PurchaseDeleteView(APIView):
         return Response({"success": bool(purchase.delete())})
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class SubscribeCreateView(CreateResponseView, generics.CreateAPIView):
-    """Класс для добавления автора в подписку."""
     queryset = Subscribe.objects.all()
     serializer_class = SubscribeSerializer
     permission_classes = [IsAuthenticated]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class SubscribeDeleteView(APIView):
-    """Класс для удаления автора из подписки."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
 
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)

@@ -1,17 +1,36 @@
 from decimal import Decimal
-from sqlite3 import IntegrityError
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from recipe import Ingredient
-from .models import RecipeIngredient
+
+from api.models import Subscribe
+from .models import Ingredient, RecipeIngredient
 
 
-def get_ingredients(request):
-    """
-    Parse POST request body for ingredient names and their respective amounts.
-    """
+BREAKFAST = 'breakfast'
+LUNCH = 'lunch'
+DINNER = 'dinner'
+TAGS = [BREAKFAST, LUNCH, DINNER]
+
+
+def tags_filter(request):
+    tags = request.GET.getlist('tag', TAGS)
+    return tags
+
+
+def follow(request, username):
+    following = False
+    if Subscribe.objects.filter(
+            user__username=request.user.username,
+            author__username=username
+    ).exists():
+        following = True
+    return following
+
+
+
+def get_add_ingredients(request):
     ingredients = {}
     for key, name in request.POST.items():
         if key.startswith('nameIngredient'):
@@ -24,9 +43,6 @@ def get_ingredients(request):
 
 
 def save_recipe(request, form):
-    """
-    Create and save a Recipe instance with neccessary m2m relationships.
-    """
     try:
         with transaction.atomic():
             recipe = form.save(commit=False)
@@ -34,7 +50,7 @@ def save_recipe(request, form):
             recipe.save()
 
             objs = []
-            ingredients = get_ingredients(request)
+            ingredients = get_add_ingredients(request)
             for name, quantity in ingredients.items():
                 ingredient = get_object_or_404(Ingredient, title=name)
                 objs.append(
@@ -51,4 +67,10 @@ def save_recipe(request, form):
     except IntegrityError:
         raise HttpResponseBadRequest
 
-
+def edit_recipe(request, form, instance):
+    try:
+        with transaction.atomic():
+            RecipeIngredient.objects.filter(recipe=instance).delete()
+            return save_recipe(request, form)
+    except IntegrityError:
+        raise HttpResponseBadRequest

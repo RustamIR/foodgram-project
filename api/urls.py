@@ -29,7 +29,7 @@ urlpatterns = [
         name='purchase_delete'
     ),
     path(
-        'subscriptions',
+        'subscriptions/',
         views.SubscribeCreateView.as_view(),
         name='subscribe_create'
     ),
@@ -37,5 +37,7 @@ urlpatterns = [
         'subscriptions/<int:id>/',
         views.SubscribeDeleteView.as_view(),
         name='subscribe_delete'
-    )
+    ),
+    path('ingredients/', views.IngredientAPIView.as_view(),
+         name='search_ingredients'),
 ]
